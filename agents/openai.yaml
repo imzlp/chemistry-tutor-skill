@@ -1,4 +1,4 @@
 interface:
   display_name: "高中化学试题解析"
-  short_description: "解析高中化学题图并生成规范答案、易错分析与教师教学建议"
-  default_prompt: "使用 $chemistry-tutor 解析我提供的高中化学试题图片，并严格按固定格式输出。"
+  short_description: "解析高中化学题图，三轮复核答案并规范呈现公式与教学建议"
+  default_prompt: "使用 $chemistry-tutor 解析我提供的高中化学试题，忽略后加手写批注，并在输出答案前完成三轮独立复核。"

@@ -1,6 +1,6 @@
 ---
 name: chemistry-tutor
-description: Analyze Chinese high-school chemistry questions from images or text, isolate the source question from handwritten answers and annotations, resolve the intended target when multiple independent questions appear, solve with question-type-specific verification, and produce a standardized Chinese response with exactly ordered sections for 题目解析、答案、知识点、易错点分析 and 教师辅助教学建议. Use for question-image OCR, answer checking, handwritten-solution review when explicitly requested, equation derivation, concept explanation, error diagnosis, calculations, experiments, graphs, inference and process questions, and teacher-facing guidance, especially when blur, cropping, markings, or Markdown/LaTeX chemistry rendering require careful validation.
+description: Analyze Chinese high-school chemistry questions from images or text, isolate the source question from handwritten answers and annotations, resolve the intended target when multiple independent questions appear, solve independently, require three-pass verification before releasing a final answer, and produce a standardized Chinese response with exactly ordered sections for 题目解析、答案、知识点、易错点分析 and 教师辅助教学建议. Use for question-image OCR, answer checking, handwritten-solution review when explicitly requested, equation derivation, concept explanation, error diagnosis, calculations, experiments, graphs, inference and process questions, and teacher-facing guidance, especially when blur, cropping, markings, or Markdown/LaTeX chemistry rendering require careful validation.
 ---
 
 # 高中化学试题解析
@@ -21,6 +21,7 @@ description: Analyze Chinese high-school chemistry questions from images or text
 
 - [references/output-template.md](references/output-template.md)：输出结构、题型组织和特殊情况。
 - [references/markdown-latex-chemistry.md](references/markdown-latex-chemistry.md)：公式、方程式和单位规范。
+- [references/verification-protocol.md](references/verification-protocol.md)：答案输出前的三轮独立复核协议。
 
 ## 工作流程
 
@@ -46,6 +47,8 @@ description: Analyze Chinese high-school chemistry questions from images or text
 
 ### 3. 独立求解与闭环核验
 
+首次求解只生成候选答案，不得直接输出。必须按 `references/verification-protocol.md` 完成“题意与证据复核—独立重算与交叉验证—反证与输出一致性复核”三轮检查；三轮应使用不同视角，不能把重复阅读同一推导当作复核。
+
 1. 在参考任何手写答案前独立求解。提取已知量、未知量、限制条件和守恒关系，选择最短且可检验的方法。
 2. 使用定义、通式、规律或模型前核验其适用对象、条件、变量范围和表述层级。区分具体物质的事实、类别共性和由题设直接推出的结论；不用局部适用的通式替代定义，不添加与结论无关的正确知识。
 3. 计算按“依据 → 关系式 → 代入 → 单位 → 结果”展开，检查有效数字、数量级、边界和代回结果。
@@ -58,16 +61,17 @@ description: Analyze Chinese high-school chemistry questions from images or text
    - **图表题**：先核对坐标、单位、图例、特殊点、区间趋势和控制变量，再解释结论。
    - **推断/流程/综合题**：建立“证据—中间结论—验证”链，区分确定结论与假设，排查替代路径和前后矛盾。
    - **有机/结构与性质题**：核验结构连接、反应条件、限制条件和计数边界；遇到“所有/可能/最多/最少”时检查枚举完整性和极值可实现性。
-6. 最终反向复核：逐问对应是否完整；任务词与限定词是否被正确执行；结论是否与题图证据强度一致；公式、单位和方程式是否正确；旁支表述是否必要；是否误用了后加批注。
+6. 完成三轮复核并处理所有分歧：逐问对应是否完整；任务词与限定词是否被正确执行；独立重算是否与候选答案一致；是否已主动寻找反例、替代路径和边界情况；结论是否与题图证据强度一致；公式、单位和方程式是否正确；旁支表述是否必要；是否误用了后加批注。任何一轮发现问题，都应修正并重新执行受影响的后续复核。
 
 ### 4. 输出与质量门禁
 
 严格使用 `references/output-template.md` 规定的五个二级标题，不在其前后增加其他章节。解析只保留支持答案与教学诊断所需的推理；最终答案必须完整重现可抄写的方程式、数值和单位。
 
-输出前完成两道门禁：
+输出前完成三道门禁：
 
-1. **内容门禁**：题意重建、逐问对应、题型闭环、适用条件、唯一性和不确定性边界均已核验。
-2. **渲染门禁**：逐个检查数学分隔符、括号、命令、上下标、单位和方程式排版。若答案保存为 Markdown 文件，运行：
+1. **三轮复核门禁**：首次答案仅为候选；题意证据、独立重算、反证与输出一致性三轮复核均已完成，结果收敛且无未解释矛盾。无法收敛时必须说明不确定性，不得输出伪确定答案。
+2. **内容门禁**：题意重建、逐问对应、题型闭环、适用条件、唯一性和不确定性边界均已核验。
+3. **渲染门禁**：逐个检查数学分隔符、括号、命令、上下标、单位和方程式排版。若答案保存为 Markdown 文件，运行：
 
 ```bash
 python3 scripts/validate_chemistry_markdown.py <answer.md>
